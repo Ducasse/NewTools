@@ -72,6 +72,8 @@ Methods can be modified and saved in directly in that pane.
 Class {
 	#name : #StDebugger,
 	#superclass : #StPresenter,
+	#traits : 'TDebugger',
+	#classTraits : 'TDebugger classTrait',
 	#instVars : [
 		'sessionHolder',
 		'code',
@@ -87,8 +89,6 @@ Class {
 	],
 	#classVars : [
 		'ActivateDebuggerExtensions',
-		'Available',
-		'DefaultDebugger',
 		'ErrorRecursion',
 		'FastTDD',
 		'UsingSpecSelector'
@@ -152,6 +152,14 @@ StDebugger class >> codeLayout [
 		  yourself
 ]
 
+{ #category : #'instance creation' }
+StDebugger class >> debugSession: aDebugSession [
+	| debugger |
+	debugger := self on: aDebugSession.
+	debugger openWithFullView.
+	^ debugger
+]
+
 { #category : #settings }
 StDebugger class >> debuggerLayoutSettingsOn: aBuilder [
 	<systemsettings>
@@ -196,6 +204,12 @@ StDebugger class >> defaultDebugger [
 StDebugger class >> defaultDebugger: aSymbol [
 	Available := (aSymbol = #GT) not.
 	DefaultDebugger := aSymbol 
+]
+
+{ #category : #accessing }
+StDebugger class >> defaultDebuggerRank [
+
+	^ 10
 ]
 
 { #category : #deprecated }
@@ -243,11 +257,6 @@ StDebugger class >> fastTDDSettingsOn: aBuilder [
 without requesting information from the user'
 ]
 
-{ #category : #opening }
-StDebugger class >> handlesContext: aContext [
-	^self availableAutomatically 
-]
-
 { #category : #'tools registry' }
 StDebugger class >> hasAnyActivatedExtension: extensionsClasses [
 
@@ -267,15 +276,8 @@ StDebugger class >> iAmADebugger [
 
 { #category : #'class initialization' }
 StDebugger class >> initialize [ 
-	
-	ErrorRecursion := false.
-
-	"Ugly check to make sure the debugger will work until everything is in the image"
-	(Smalltalk tools respondsTo: #registerDebugger:withRank:) ifFalse: [ ^ self ].
-
-	"Add ourselves to registry. See [Smalltalk tools]" 
-	Smalltalk tools registerDebugger: self withRank: self rank.
-	
+	self flag: 'Error recursion is used only here?'.
+	ErrorRecursion := false
 ]
 
 { #category : #opening }
@@ -647,9 +649,11 @@ StDebugger >> initializeExtensionTools [
 
 { #category : #initialization }
 StDebugger >> initializeInspector [
+
 	inspector := self
-		instantiate: StDebuggerInspector
-		on: (StDebuggerInspectorModel on: nil).
+		             instantiate: StDebuggerInspector
+		             on:
+		             (StDebuggerInspectorModel on: StDebuggerContext new).
 	inspector label: 'Receiver'
 ]
 
@@ -693,7 +697,7 @@ StDebugger >> initializeStack [
 	stackTable
 		addColumn: (SpStringTableColumn
 				 title: 'Class'
-				 evaluated: [ :item | item receiver class ]);
+				 evaluated: [ :item | self printReceiverClassInContext: item ]);
 		addColumn:
 			(SpStringTableColumn title: 'Method' evaluated: [ :item | 
 					 | method |
@@ -757,7 +761,7 @@ StDebugger >> interruptedProcess [
 StDebugger >> newTitleString [
 	(debuggerActionModel exceptionInContextOrNil: self context)
 		ifNotNil: [ :ex | ^ ex description ].
-	^ self context currentNode isHaltNode
+	^ self context sourceNodeExecuted isHaltNode
 		ifTrue: [ 'Halt' ]
 		ifFalse: [ self context receiver class name , '>>' , self context selector ]
 ]
@@ -785,6 +789,22 @@ StDebugger >> openWithFullView [
 { #category : #opening }
 StDebugger >> openWithNotification: notificationString [
 	self openWithFullView
+]
+
+{ #category : #printing }
+StDebugger >> printReceiverClassInContext: aContext [
+
+	| receiverClass methodClass |
+	receiverClass := aContext receiver class.
+	methodClass := aContext method methodClass.
+	receiverClass == methodClass ifTrue: [ ^ receiverClass name ].
+	^ (WriteStream on: String new)
+		  nextPutAll: receiverClass name;
+		  space;
+		  nextPut: $(;
+		  nextPutAll: methodClass name;
+		  nextPut: $);
+		  contents
 ]
 
 { #category : #actions }
@@ -1021,7 +1041,7 @@ StDebugger >> titlePrefixTextForCurrentContext [
 	self context sender == self currentContext
 		ifTrue: [ (debuggerActionModel exceptionInContextOrNil: self context)
 				ifNotNil: [ :ex | ^ ex description , ' in ' ] ].
-	^ self currentContext currentNode isHaltNode
+	^ self currentContext sourceNodeExecuted isHaltNode
 		ifTrue: [ 'Halt in ' ]
 		ifFalse: [ '' ]
 ]
@@ -1102,16 +1122,14 @@ StDebugger >> updateExtensionsFrom: newSession [
 
 { #category : #'updating widgets' }
 StDebugger >> updateInspectorFromContext: aContext [
+
 	inspector
 		updateLayoutForContexts: self session interruptedContext
 		isAssertionFailure:
 		self debuggerActionModel isInterruptedContextAnAssertEqualsFailure.
-	inspector updateWith: (StDebuggerContext
-			 context: aContext
-			 session: self session
-			 debugger: self).
+	inspector updateWith: (StDebuggerContext context: aContext).
 	self flag: #DBG_INSPECTOR_UPDATE_BUG.
-	inspector getRawInspectorPresenterOrNil ifNotNil: [:p| p update].
+	inspector getRawInspectorPresenterOrNil ifNotNil: [ :p | p update ]
 ]
 
 { #category : #'updating actions' }
