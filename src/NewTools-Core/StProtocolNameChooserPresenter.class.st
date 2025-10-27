@@ -57,22 +57,20 @@ StProtocolNameChooserPresenter class >> requestProtocolNameConfiguring: aBlock [
 	"I request a protocol name through a dialog and signal a CmdCommandAborted in case the provided protocol is empty or an extension name.
 	I allow the user to configure the presenter or the dialog via a configuration block."
 
-	| protocolName presenter dialog |
+	| protocolName presenter dialog aborted |
 	dialog := (presenter := self new) asBlockedDialogWindow.
 	aBlock cull: presenter cull: dialog.
 	presenter selectProtocolName.
 	dialog open.
 
-	dialog cancelled ifTrue: [ CmCommandAborted new 
-											application: StPharoApplication current; 
-											signal ].
-	protocolName := presenter selectedProtocolName ifNil: [ CmCommandAborted new 
-											application: StPharoApplication current; 
-											signal  ].
-	(protocolName beginsWith: '*') ifTrue: [
+	aborted := CmCommandAborted new 
+						application: StPharoApplication current.
+	dialog cancelled ifTrue: [ aborted signal ].
+	protocolName := presenter selectedProtocolName ifNil: [ aborted signal ].
+	(protocolName beginsWith: '*') 
+		ifTrue: [
 			presenter inform: 'Star is forbidden for protocol name since this is used for method extensions.'.
-			^ CmCommandAborted signal ].
-
+			^ aborted signal ].
 	^ protocolName
 ]
 
