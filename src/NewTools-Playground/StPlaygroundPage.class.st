@@ -10,7 +10,6 @@ Class {
 	#name : 'StPlaygroundPage',
 	#superclass : 'Object',
 	#instVars : [
-		'creationTime',
 		'fileName',
 		'mutex',
 		'flushContents',
@@ -99,7 +98,7 @@ StPlaygroundPage >> contents: aString [
 { #category : 'accessing' }
 StPlaygroundPage >> creationTime [
 
-	^ creationTime
+	^ DateAndTime now
 ]
 
 { #category : 'private' }
@@ -129,7 +128,7 @@ StPlaygroundPage >> ensureContentsFlushed [
 { #category : 'accessing' }
 StPlaygroundPage >> fileName [
 
-	^ fileName ifNil: [ fileName := self creationTimeForFileName ]
+	^ fileName ifNil: [ self creationTimeForFileName ]
 ]
 
 { #category : 'accessing' }
@@ -172,7 +171,7 @@ StPlaygroundPage >> fromReference: aFileReference [
 	aFileReference parent = self baseDirectory 
 		ifFalse: [ self baseDirectory: aFileReference parent ].
 	fileName := aFileReference basenameWithoutExtension.
-	creationTime := aFileReference creationTime
+	"creationTime := aFileReference creationTime"
 ]
 
 { #category : 'initialization' }
@@ -180,7 +179,6 @@ StPlaygroundPage >> initialize [
 
 	super initialize.
 	contentReceived := false.
-	creationTime := DateAndTime now.
 	mutex := Mutex new
 ]
 
