@@ -12,6 +12,6 @@ Class {
 
 { #category : 'enumerating' }
 StClassIterator >> elementsDo: aValuable [
-
+	
 	SystemNavigation default allBehaviorsDo: aValuable
 ]

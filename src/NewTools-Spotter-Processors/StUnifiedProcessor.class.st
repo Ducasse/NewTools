@@ -81,6 +81,12 @@ StUnifiedProcessor >> calculateUppercaseSourcesOn: anStream [
 	
 	(self categoriesIncludes: #Classes) 
 		ifTrue: [
+			classesBeginsWith := (StNecSessionIterator fetcher: (CoGlobalVariableFetcher new )) asBeginsWithFilter.
+			textFilteringIterators add: classesBeginsWith.
+			anStream nextPut: classesBeginsWith ].
+		
+"	(self categoriesIncludes: #Classes) 
+		ifTrue: [
 			classesBeginsWith := StSourceFactory current classesBeginsWithSource.			
 			textFilteringIterators add: classesBeginsWith.
 			anStream nextPut: classesBeginsWith ].
@@ -131,7 +137,7 @@ StUnifiedProcessor >> calculateUppercaseSourcesOn: anStream [
 					asSubstringFilter); 
 				yourself.
 			textFilteringIterators add: wordsAwarePackageSource.
-			anStream nextPut: wordsAwarePackageSource ]
+			anStream nextPut: wordsAwarePackageSource ]"
 ]
 
 { #category : 'sources' }
