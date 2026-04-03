@@ -353,7 +353,7 @@ StMethodBrowser >> handleMethodAdded: anAnnouncement [
 	boolean ifTrue: [ text := textPresenter pendingText ].
 	
 	sel := self selectedMethod.
-	self methods: (self methods add: item asFullRingDefinition; yourself).
+	self methods: (self methods add: item ; yourself).
 	self selectedMessage: sel.
 	
 	boolean ifTrue: [ textPresenter pendingText: text ]
