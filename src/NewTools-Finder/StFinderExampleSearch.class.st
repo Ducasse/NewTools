@@ -117,6 +117,21 @@ StFinderExampleSearch >> search: aString in: aRBBrowserEnvironment [
 
 ]
 
+{ #category : 'searching' }
+StFinderExampleSearch >> searchByRegexCaseInsensitive: aRegex in: anEnvironment [
+	"Perform a search given aRegex in anEnvironment."
+	"does nothing because it cannot."
+	^ self 
+]
+
+{ #category : 'searching' }
+StFinderExampleSearch >> searchBySubstring: aString in: anEnvironment [
+	"Perform a search given aString in anEnvironment."
+	"does nothing because it cannot"
+	
+	^ self 
+]
+
 { #category : 'initialization' }
 StFinderExampleSearch >> setSearchStrategyFrom: aDictionary [
 	"Set the receiver's search strategy according to aCollection of options"
