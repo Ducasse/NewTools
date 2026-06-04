@@ -86,7 +86,6 @@ StFinderResult >> compileMethodWithSource: text in: aSpCodePresenter [
 	^ selectedClass
 		  compile: text
 		  classified: aSpCodePresenter interactionModel method protocol name
-		  notifying: nil
 ]
 
 { #category : 'accessing' }

@@ -62,7 +62,7 @@ StFinderExampleSearch >> computeWithMethodFinder: aString [
 	"Compute the selectors for the single example of receiver and args, in the very top pane"
 
 	^ (self computeDataObjects: aString) 
-		ifNotEmpty: [ : dataObjects | 
+		ifNotEmpty: [ :dataObjects | 
 			StMethodFinder new 
 				findMethodsByExampleInput: dataObjects allButLast 
 				andExpectedResult: dataObjects last

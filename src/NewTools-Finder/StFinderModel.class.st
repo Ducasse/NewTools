@@ -158,8 +158,7 @@ StFinderModel >> search [
 	"Performs a search and stores the results in `self resultsDictionary`."
 
 	searchString isEmpty ifTrue: [ ^ self ].
-
-	[ : job |
+	[ :job |
 		self searchStarted.
 		time := Time millisecondsToRun: [ results := self search: searchString ].
 		self searchEnded 
